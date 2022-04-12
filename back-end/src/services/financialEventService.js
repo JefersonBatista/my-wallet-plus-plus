@@ -1,5 +1,5 @@
-import connection from "../database.js";
 import { unprocessableEntityError } from "../utils/errorUtils.js";
+import * as financialEventRepository from "../repositories/financialEventRepository.js";
 
 export async function register({ userId, value, type }) {
 	const financialTypes = ["INCOME", "OUTCOME"];
@@ -11,19 +11,13 @@ export async function register({ userId, value, type }) {
 		throw unprocessableEntityError();
 	}
 
-	await connection.query(
-		`INSERT INTO "financialEvents" ("userId", "value", "type") VALUES ($1, $2, $3)`,
-		[userId, value, type]
-	);
+	await financialEventRepository.insert({ userId, value, type });
 }
 
 export async function list(userId) {
-	const result = await connection.query(
-		`SELECT * FROM "financialEvents" WHERE "userId"=$1 ORDER BY "id" DESC`,
-		[userId]
-	);
+	const events = await financialEventRepository.getAllByUser(userId);
 
-	return result.rows;
+	return events;
 }
 
 export async function sum(userId) {

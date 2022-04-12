@@ -1,33 +1,23 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import connection from "../database.js";
 import { conflictError, unauthorizedError } from "../utils/errorUtils.js";
+import * as authRepository from "../repositories/authRepository.js";
 
 export async function signUp({ name, email, password }) {
-	const existingUsers = await connection.query(
-		`SELECT * FROM "users" WHERE "email"=$1`,
-		[email]
-	);
+	const existingUser = await authRepository.findUserByEmail(email);
 
-	if (existingUsers.rowCount > 0) {
+	if (existingUser) {
 		throw conflictError();
 	}
 
 	const hashedPassword = bcrypt.hashSync(password, 12);
 
-	await connection.query(
-		`INSERT INTO "users" ("name", "email", "password") VALUES ($1, $2, $3)`,
-		[name, email, hashedPassword]
-	);
+	await authRepository.createUser({ name, email, hashedPassword });
 }
 
 export async function signIn({ email, password }) {
-	const { rows } = await connection.query(
-		`SELECT * FROM "users" WHERE "email"=$1`,
-		[email]
-	);
-	const [user] = rows;
+	const user = await authRepository.findUserByEmail(email);
 
 	if (!user || !bcrypt.compareSync(password, user.password)) {
 		throw unauthorizedError();
