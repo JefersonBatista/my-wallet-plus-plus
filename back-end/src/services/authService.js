@@ -33,7 +33,7 @@ export async function signIn({ email, password }) {
 	return token;
 }
 
-export async function identifyUser(token) {
+export function identifyUser(token) {
 	try {
 		const user = jwt.verify(token, process.env.JWT_SECRET);
 		return user;
