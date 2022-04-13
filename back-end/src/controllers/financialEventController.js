@@ -1,15 +1,7 @@
-import * as authService from "../services/authService.js";
 import * as financialEventService from "../services/financialEventService.js";
 
 export async function register(req, res) {
-	const authorization = req.headers.authorization || "";
-	const token = authorization.replace("Bearer ", "");
-
-	if (!token) {
-		return res.sendStatus(401);
-	}
-
-	const user = await authService.identifyUser(token);
+	const { user } = res.locals;
 
 	const { value, type } = req.body;
 
@@ -23,14 +15,7 @@ export async function register(req, res) {
 }
 
 export async function list(req, res) {
-	const authorization = req.headers.authorization || "";
-	const token = authorization.replace("Bearer ", "");
-
-	if (!token) {
-		return res.sendStatus(401);
-	}
-
-	const user = await authService.identifyUser(token);
+	const { user } = res.locals;
 
 	const events = await financialEventService.list(user.id);
 
@@ -38,14 +23,7 @@ export async function list(req, res) {
 }
 
 export async function sum(req, res) {
-	const authorization = req.headers.authorization || "";
-	const token = authorization.replace("Bearer ", "");
-
-	if (!token) {
-		return res.sendStatus(401);
-	}
-
-	const user = await authService.identifyUser(token);
+	const { user } = res.locals;
 
 	const sum = await financialEventService.sum(user.id);
 
